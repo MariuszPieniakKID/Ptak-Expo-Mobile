@@ -116,7 +116,7 @@ const LoginScreen = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ImageBackground 
-        source={require('../../assets/background.png')} 
+        source={{uri: 'https://user-front-production-ec90.up.railway.app/assets/image-35@2x.png'}} 
         style={styles.backgroundImage}
         resizeMode="cover"
       >
