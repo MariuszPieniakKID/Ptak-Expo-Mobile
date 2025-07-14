@@ -17,6 +17,31 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  const logout = useCallback(async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Logout API error:', error);
+    } finally {
+      try {
+        await AsyncStorage.multiRemove(['token', 'user']);
+      } catch (error) {
+        console.error('Error removing data from AsyncStorage:', error);
+      }
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  const verifyToken = useCallback(async () => {
+    try {
+      await authAPI.verify();
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      await logout();
+    }
+  }, [logout]);
+
   const checkAuthState = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -39,20 +64,11 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [verifyToken]);
 
   useEffect(() => {
     checkAuthState();
   }, [checkAuthState]);
-
-  const verifyToken = async () => {
-    try {
-      await authAPI.verify();
-    } catch (error) {
-      console.error('Token verification failed:', error);
-      await logout();
-    }
-  };
 
   const login = async (credentials) => {
     try {
@@ -75,21 +91,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Logout API error:', error);
-    } finally {
-      try {
-        await AsyncStorage.multiRemove(['token', 'user']);
-      } catch (error) {
-        console.error('Error removing data from AsyncStorage:', error);
-      }
-      setUser(null);
-      setIsAuthenticated(false);
-    }
-  };
+
 
   const value = {
     user,
